@@ -1,4 +1,4 @@
-# portfolio
+# Vue playground
 
 > A Vue.js project
 
