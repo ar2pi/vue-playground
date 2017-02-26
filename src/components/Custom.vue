@@ -1,31 +1,59 @@
 <template>
   <div class="custom">
-    <h1 v-once>{{ msg | uppercase(true) }}</h1>
-    <h1>{{ msg }}</h1>
-    <h3 v-bind:title="testTitle">{{ test }}</h3>
-    <button class="btn" v-on:click="testMethod">Click Event</button>
-    <button class="btn" v-on:click="otherTestMethod">Other Click Event</button>
+    <h1 v-once>This value will not change: {{ msg | uppercase(true) }}</h1>
+    <h1><input type="text" v-model="msg"></h1>
+    <span>This value here be dynamic: {{ msg }}</span>
+    <h3 :title="testTitle">{{ test }}</h3>
+    <button class="btn" @click="testMethod">Click this</button>
+    <button class="btn" @click="otherTestMethod">Show todos</button>
     <ul v-if="hideTodos">
-      <todo-item v-for="item in todos" v-bind:todo="item"></todo-item>
+      <todo-item v-for="item in todos" :todo="item"></todo-item>
     </ul>
-    <div><a :href="currentChapter" target="_blank">Current chapter in Vue.js guide</a></div>
     <div>{{ printDate }}</div>
+    <div :class="{ mounted: isMounted }">{{ counter }}<button @click="destroyInstance">Destroy instance</button></div>
   </div>
 </template>
 
 <script>
-import Vue from 'vue';
-
-Vue.component('todo-item', {
-  // The todo-item component now accepts a
-  // "prop", which is like a custom attribute.
-  // This prop is called todo.
-  props: ['todo'],
-  template: '<li>{{ todo.text }}</li>',
-});
-
 export default {
   name: 'Test',
+  data() {
+    return {
+      msg: 'Custom component msg value',
+      test: 'jaja',
+      testTitle: 'this\'d be a title :3',
+      todos: [
+        { text: 'TO DO' },
+        { text: 'or NOT TO DO' },
+        { text: 'that is the question' },
+      ],
+      hideTodos: false,
+      isMounted: false,
+      counter: 0,
+    };
+  },
+  beforeCreate() {
+    console.log('=== Before Create ===');
+    console.log(this);
+  },
+  mounted() {
+    console.log('=== Mounted ===');
+    // kind of jQuery(document).ready
+    this.isMounted = true;
+    this.$interval = setInterval(() => {
+      this.counter++;
+    }, 1000);
+  },
+  destroyed() {
+    console.log('=== Detroyed ===');
+    clearInterval(this.$interval);
+  },
+  components: {
+    todoItem: {
+      props: ['todo'],
+      template: '<li>{{ todo.text }}</li>',
+    },
+  },
   methods: {
     testMethod() {
       console.log('clicked that bitch');
@@ -34,6 +62,9 @@ export default {
     },
     otherTestMethod() {
       this.hideTodos = !this.hideTodos;
+    },
+    destroyInstance() {
+      this.$destroy();
     },
   },
   filters: {
@@ -48,20 +79,6 @@ export default {
     printDate() {
       return (new Date()).toString();
     },
-  },
-  data() {
-    return {
-      msg: 'Custom component msg value',
-      test: 'jaja',
-      testTitle: 'this\'d be a title :3',
-      todos: [
-        { text: 'TO DO' },
-        { text: 'or NOT TO DO' },
-        { text: 'that is the question' },
-      ],
-      hideTodos: false,
-      currentChapter: 'https://vuejs.org/v2/guide/computed.html#Computed-Setter',
-    };
   },
 };
 </script>
@@ -78,11 +95,14 @@ ul {
 }
 
 li {
-  display: inline-block;
   margin: 0 10px;
 }
 
 a {
   color: #42b983;
+}
+
+.mounted {
+  color: green;
 }
 </style>
