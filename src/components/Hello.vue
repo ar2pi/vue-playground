@@ -1,7 +1,8 @@
 <template>
   <div class="hello">
     <h1>{{ msg }}</h1>
-    <h3><router-link :to="{ name: 'Custom' }">{{ test }}</router-link></h3>
+    <h3><router-link :to="{ name: 'Custom' }">/custom</router-link></h3>
+    <h3><router-link :to="{ name: 'Layout' }">/layout</router-link></h3>
     <div><a :href="tuto" target="_blank">Vue.js guide</a></div>
     <div><a :href="doc" target="_blank">API reference</a></div>
     <h2>Other resources</h2>
