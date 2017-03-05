@@ -25,6 +25,14 @@ module.exports = {
   // add your custom rules here
   'rules': {
     'no-plusplus': 0,
+    'no-new': 0,
+    'max-len': 0,
+    'no-underscore-dangle': 0,
+    'prefer-arrow-callback': 0,
+    'space-before-function-paren': 0,
+    'prefer-const': 1,
+    'no-unused-vars': 1,
+    'prefer-template': 1,
     // don't require .vue extension when importing
     'import/extensions': ['error', 'always', {
       'js': 'never',

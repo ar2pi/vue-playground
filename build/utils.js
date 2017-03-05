@@ -9,6 +9,12 @@ exports.assetsPath = function (_path) {
   return path.posix.join(assetsSubDirectory, _path)
 }
 
+exports.optionsLoaders = function (cssOptions) {
+  var returnLoaders = exports.cssLoaders(cssOptions);
+  returnLoaders.audio = 'file-loader';
+  return returnLoaders;
+}
+
 exports.cssLoaders = function (options) {
   options = options || {}
 

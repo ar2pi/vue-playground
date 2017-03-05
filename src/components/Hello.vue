@@ -3,8 +3,10 @@
     <h1>{{ msg }}</h1>
     <h3><router-link :to="{ name: 'Custom' }">/custom</router-link></h3>
     <h3><router-link :to="{ name: 'Layout' }">/layout</router-link></h3>
+    <h3><router-link :to="{ name: 'AudioPlayer' }">/audio-player</router-link></h3>
     <div><a :href="tuto" target="_blank">Vue.js guide</a></div>
     <div><a :href="doc" target="_blank">API reference</a></div>
+    <div><a :href="examples" target="_blank">Vue examples</a></div>
     <h2>Other resources</h2>
       <div><a href="https://www.grafikart.fr/formations/vuejs" target="_blank">Grafikart</a></div>
     <h2>Essential Links</h2>
@@ -35,6 +37,7 @@ export default {
       test: '/Custom',
       tuto: 'https://vuejs.org/v2/guide/',
       doc: 'https://vuejs.org/v2/api/',
+      examples: 'http://vuejsexamples.com/',
     };
   },
 };

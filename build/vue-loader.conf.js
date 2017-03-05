@@ -3,7 +3,7 @@ var config = require('../config')
 var isProduction = process.env.NODE_ENV === 'production'
 
 module.exports = {
-  loaders: utils.cssLoaders({
+  loaders: utils.optionsLoaders({
     sourceMap: isProduction
       ? config.build.productionSourceMap
       : config.dev.cssSourceMap,
@@ -13,5 +13,8 @@ module.exports = {
     require('autoprefixer')({
       browsers: ['last 2 versions']
     })
-  ]
+  ],
+  transformToRequire: {
+    audio: 'src'
+  }
 }
