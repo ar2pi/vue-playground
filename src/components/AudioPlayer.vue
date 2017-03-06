@@ -4,9 +4,8 @@
   <img src="../assets/logo.png"></img>
 
   <div v-for="track in tracks" class="track"
-    :class="{ active: activeAudio.element === track }"
-    @click="toggleTrack(track, $event)"
-    :data-file="track.file">{{ track.title }}</div>
+    :class="{ active: activeAudio.$element === track }"
+    @click="toggleTrack(track)">{{ track.title }}</div>
 
   <!-- <audio src="static/audio/EUPHONIK  - UNE SAISON EN ENFER.mp3" controls></audio> -->
 </div>
@@ -14,6 +13,10 @@
 
 <script>
 const tracks = [
+  {
+    file: 'looperman.mp3',
+    title: 'TEST SOUND',
+  },
   {
     file: 'track1.mp3',
     title: 'EUPHONIK  - UNE SAISON EN ENFER',
@@ -46,7 +49,7 @@ function initAudioContext() {
   return response;
 }
 
-function loadAudioElement(file) {
+function loadAudioFile(file) {
   const url = `static/audio/${file}`;
   return new Promise(function(resolve, reject) {
     let audio = new Audio();
@@ -58,11 +61,12 @@ function loadAudioElement(file) {
   });
 }
 
-function playSound(context, source) {
-  let newBuffer = context.createMediaElementSource(source);
-  newBuffer.connect(context.destination);
-  source.play();
-  return newBuffer;
+function playAudio(context, el) {
+  let source = context.createMediaElementSource(el);
+  let analyser = context.createAnalyser();
+  source.connect(analyser).connect(context.destination);
+  el.play();
+  return source;
 }
 
 export default {
@@ -70,9 +74,9 @@ export default {
     return {
       AudioContext: initAudioContext(),
       activeAudio: {
-        element: null,
+        $element: null,
+        object: null,
         _source: null,
-        _buffer: null,
       },
       tracks,
     };
@@ -92,22 +96,65 @@ export default {
     // },
   },
   methods: {
-    toggleTrack(track, e) {
-      if (this.AudioContext !== null && this.activeAudio.element !== track) {
-        let self = this;
-        if (self.activeAudio._buffer !== null) {
-          self.activeAudio._buffer.disconnect();
+    toggleTrack(track) {
+      if (this.AudioContext !== null) {
+        if (this.activeAudio.$element !== track) {
+          this.stopCurrentTrack();
+          this.loadTrack(track);
+        } else if (this.AudioContext.state === 'running') {
+          // manage via AudioContext to keep track of state
+          this.AudioContext.suspend();
+          // self.activeAudio.object.pause();
+        } else if (this.AudioContext.state === 'suspended') {
+          this.AudioContext.resume();
+          // self.activeAudio.object.play();
         }
-        loadAudioElement(e.target.dataset.file).then(function(el) {
-          self.activeAudio = {
-            element: track,
-            _source: el,
-            _buffer: playSound(self.AudioContext, el),
-          };
+      }
+    },
+    loadTrack(track) {
+      if (this.activeAudio.$element === null || track.file !== this.activeAudio.$element.file) {
+        let self = this;
+        // load and play new track
+        loadAudioFile(track.file).then(function(el) {
+          self.switchTrack(track, el);
         }, function(el) {
           throw el.error;
         });
+      } else if (track !== this.activeAudio.$element) {
+        // play new track, no need to reload file
+        self.switchTrack(track, this.activeAudio.object);
+      } else {
+        // replay track
+        playAudio(this.AudioContext, this.activeAudio.object);
       }
+    },
+    switchTrack(track, el) {
+      this.activeAudio = {
+        $element: track,                            // vue element
+        object: el,                                 // native audio object
+        _source: playAudio(this.AudioContext, el),  // media element audio source node
+      };
+      let self = this;
+      el.addEventListener('ended', function() {
+        self.nextTrack();
+      });
+    },
+    stopCurrentTrack() {
+      if (this.activeAudio.object !== null) {
+        if (!this.activeAudio.object.paused) {
+          this.activeAudio.object.pause();
+        }
+        this.activeAudio.object.currentTime = 0;
+      }
+      if (this.activeAudio._source !== null) {
+        this.activeAudio._source.disconnect();
+      }
+    },
+    nextTrack() {
+      this.loadTrack(this.tracks[(this.tracks.indexOf(this.activeAudio.$element) + 1) % this.tracks.length]);
+    },
+    previousTrack() {
+      this.loadTrack(this.tracks[((this.tracks.indexOf(this.activeAudio.$element) - 1) + this.tracks.length) % this.tracks.length]);
     },
   },
   filters: {
